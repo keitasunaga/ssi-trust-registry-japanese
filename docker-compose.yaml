@@ -1,0 +1,132 @@
+version: '3'
+
+services:
+  trust-registry:
+    image: ${REGISTRY:-local}/ssi-trust-registry:${IMAGE_TAG:-latest}
+    container_name: trust-registry
+    ports:
+      - 3000:3000
+      - 3001:3001
+    healthcheck:
+      test: curl -f http://localhost:3000/health
+      interval: 15s
+      timeout: 5s
+      start_period: 300s
+    environment:
+      URL: http://0.0.0.0
+      PORT: 3000
+      DB_CONNECTION_STRING: mongodb://mongo:mongo@mongo:27017
+      DB_NAME: trust-registry
+      SMTP_HOST: smtp4dev
+      SMTP_PORT: 25
+      SMTP_USER: user
+      SMTP_PASSWORD: password
+      AUTH_JWT_SECRET_KEY: authjwtsecretkey
+      AUTH_ADMIN_PASSWORD_HASH: $$2b$$10$$Jo5knrTTpteyyyBN1aCh3.JThMmLxtX33Djl4H8rprAG1UCUOYIRm
+      FRONTEND_URL: http://localhost:3001
+      SKIP_INITIAL_DATA_LOAD: true
+      LOGGER_LOG_LEVEL: debug
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:3000
+    networks:
+      - ssi-trust-registry
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    container_name: mongo
+    image: mongo:7.0
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cp /auth/local.file.key /auth/file.key
+        chmod 400 /auth/file.key
+        chown 999:999 /auth/file.key
+        exec docker-entrypoint.sh $$@
+    command:
+      [
+        "mongod",
+        "--port",
+        "27017",
+        "--keyFile",
+        "/auth/file.key",
+        "--replSet",
+        "rs0",
+        "--bind_ip_all"
+      ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: trust-registry
+    expose:
+      - 27017
+    ports:
+      - 27017:27017
+    networks:
+      - ssi-trust-registry
+    volumes:
+      - ./.docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
+      - ./.docker/mongodb/local.file.key:/auth/local.file.key
+    healthcheck:
+      test: echo 'rs.status().ok' | mongosh admin --port 27017 -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet | grep 1
+      interval: 30s
+      start_period: 60s
+  mongo-replica-setup:
+    container_name: mongo-setup
+    image: mongo:7.0
+    restart: on-failure
+    networks:
+      - ssi-trust-registry
+    volumes:
+      - ./.docker/mongodb/scripts:/scripts
+    entrypoint: [ "bash", "/scripts/mongo-setup.sh" ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+    depends_on:
+      - mongo
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: true
+      ME_CONFIG_MONGODB_ADMINUSERNAME: mongo
+      ME_CONFIG_MONGODB_ADMINPASSWORD: mongo
+      ME_CONFIG_MONGODB_SERVER: mongo
+    networks:
+      - ssi-trust-registry
+    depends_on:
+      mongo:
+        condition: service_healthy
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    container_name: smtp4dev
+    ports:
+      - 5000:80
+      - 25:25
+    networks:
+      - ssi-trust-registry
+    volumes:
+      - smtp4dev-data:/smtp4dev
+
+  trust-registry-health:
+    image: curlimages/curl
+    container_name: trust-registry-health
+    restart: 'no'
+    command: /bin/sh -c "until curl -fsS http://trust-registry:3000/health; do sleep 1; done"
+    networks:
+      - ssi-trust-registry
+    depends_on:
+      trust-registry:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
+  smtp4dev-data:
+
+
+networks:
+  ssi-trust-registry:

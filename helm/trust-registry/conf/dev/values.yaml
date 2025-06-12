@@ -1,0 +1,39 @@
+replicaCount: 1
+
+image:
+  tag: latest
+
+extraEnvVars:
+  dbConnectionString:
+    valueFrom:
+      secretKeyRef:
+        name: mongo-connect
+        key: dbConnectionString
+
+initContainers: []
+
+ingress:
+  internal:
+    enabled: true
+    hosts:
+      - host: ssi-trust-registry.cloudapi.dev.didxtech.com
+  external:
+    enabled: true
+    hosts:
+      - host: ssi-trust-registry.cloudapi.dev.didxtech.com
+
+config:
+  frontendUrl: https://ssi-trust-registry.cloudapi.dev.didxtech.com
+  nextPublicBackendUrl: https://ssi-trust-registry.cloudapi.dev.didxtech.com
+
+resources: {}
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,17 @@
+## Ignore everyting
+**
+
+# Except the following
+!.eslintignore
+!.eslintrc.js
+!.prettierrc.js
+!jest.config.js
+!LICENSE
+!package.json
+!tsconfig.json
+!yarn.lock
+!/packages/**/src
+!/packages/frontend/public
+!/packages/frontend/*.config.*
+!/packages/**/package.json
+!/packages/**/tsconfig.json

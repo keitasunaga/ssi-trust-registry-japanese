@@ -1,0 +1,38 @@
+environments:
+  dev:
+    values:
+      - namespace: trust-registry-dev
+        ddInjectEnabled: true
+        ddProfilingEnabled: false
+  prod:
+    values:
+      - namespace: trust-registry-prod
+        ddInjectEnabled: true
+        ddProfilingEnabled: false
+---
+repositories:
+- name: bitnami
+  url: oci://registry-1.docker.io/bitnamicharts
+  oci: true
+---
+releases:
+- name: trust-registry
+  namespace: {{ .Values.namespace }}
+  chart: ./trust-registry
+  values:
+    - ./trust-registry/conf/{{ .Environment.Name }}/values.yaml
+    - deploymentLabels:
+        tags.datadoghq.com/env: {{ .Environment.Name }}
+      podLabels:
+        tags.datadoghq.com/env: {{ .Environment.Name }}
+        admission.datadoghq.com/enabled: {{ quote .Values.ddInjectEnabled }}
+  set:
+    - name: extraEnvVars.ddProfilingEnabled
+      value: {{ .Values.ddProfilingEnabled }}
+---
+helmDefaults:
+  timeout: 300
+  wait: true
+  atomic: true
+  cleanupOnFail: true
+  createNamespace: false
