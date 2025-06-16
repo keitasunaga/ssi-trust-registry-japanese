@@ -25,6 +25,8 @@ services:
       AUTH_ADMIN_PASSWORD_HASH: $$2b$$10$$Jo5knrTTpteyyyBN1aCh3.JThMmLxtX33Djl4H8rprAG1UCUOYIRm
       FRONTEND_URL: http://localhost:3001
       SKIP_INITIAL_DATA_LOAD: true
+      SKIP_DID_VALIDATION: true
+      NODE_ENV: development
       LOGGER_LOG_LEVEL: debug
       NEXT_PUBLIC_BACKEND_URL: http://localhost:3000
     networks:
@@ -46,14 +48,14 @@ services:
         exec docker-entrypoint.sh $$@
     command:
       [
-        "mongod",
-        "--port",
-        "27017",
-        "--keyFile",
-        "/auth/file.key",
-        "--replSet",
-        "rs0",
-        "--bind_ip_all"
+        'mongod',
+        '--port',
+        '27017',
+        '--keyFile',
+        '/auth/file.key',
+        '--replSet',
+        'rs0',
+        '--bind_ip_all',
       ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
@@ -80,7 +82,7 @@ services:
       - ssi-trust-registry
     volumes:
       - ./.docker/mongodb/scripts:/scripts
-    entrypoint: [ "bash", "/scripts/mongo-setup.sh" ]
+    entrypoint: ['bash', '/scripts/mongo-setup.sh']
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
@@ -105,8 +107,10 @@ services:
     image: rnwood/smtp4dev:v3
     container_name: smtp4dev
     ports:
-      - 5000:80
+      - 5001:80
       - 25:25
+    environment:
+      - ServerOptions__Urls=http://*:80
     networks:
       - ssi-trust-registry
     volumes:
@@ -126,7 +130,6 @@ services:
 volumes:
   mongo-data:
   smtp4dev-data:
-
 
 networks:
   ssi-trust-registry:

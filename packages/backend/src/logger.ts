@@ -12,11 +12,11 @@ const requestId = winston.format((info) => {
 })
 
 const metadata = winston.format((info) => {
-  const additionalArgs = info[Symbol.for('splat')]
-  if (additionalArgs) {
+  const additionalArgs = info[Symbol.for('splat')] as unknown[]
+  if (additionalArgs && Array.isArray(additionalArgs)) {
     if (additionalArgs.length === 1) {
       info.metadata = additionalArgs[0]
-    } else {
+    } else if (additionalArgs.length > 1) {
       info.metadata = additionalArgs
     }
   }

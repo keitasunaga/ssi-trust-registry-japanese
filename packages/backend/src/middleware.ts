@@ -94,13 +94,13 @@ export function swaggerDocs(
   url: string,
   port: number,
   openApiDocs: Record<string, unknown>,
-): [RequestHandler[], RequestHandler] {
+): RequestHandler[] {
   const uiOptions = {
     swaggerOptions: {
       url: `${url}:${port}/api/docs-json`,
     },
   }
-  return [swaggerUi.serve, swaggerUi.setup(openApiDocs, uiOptions)]
+  return [...(swaggerUi.serve as unknown as RequestHandler[]), swaggerUi.setup(openApiDocs, uiOptions) as unknown as RequestHandler]
 }
 
 export function disableInProduction(

@@ -90,7 +90,7 @@ function createToken(userId: string) {
     sub: userId,
   }
   const secretKey = config.auth.jwtSecretKey
-  const options = {
+  const options: jwt.SignOptions = {
     expiresIn: '1h',
   }
   return jwt.sign(payload, secretKey, options)

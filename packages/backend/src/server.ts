@@ -29,7 +29,7 @@ export function startServer(
     const app = express()
 
     const corsOptions = {
-      origin: config.frontendUrl, // Replace with your frontend URL
+      origin: [config.frontendUrl, 'http://localhost:3002'], // Allow both frontend URLs
       credentials: true, // Allow cookies to be sent
     }
     app.use(cors(corsOptions))
@@ -44,15 +44,14 @@ export function startServer(
     const apiRouter = express.Router()
     app.use('/api', apiRouter)
 
-    if (process.env.NODE_ENV !== 'production') {
-      const swaggerDocsJson = JSON.parse(
-        JSON.stringify(generateSwaggerDocs(context)),
-      )
-      apiRouter.use('/docs', ...swaggerDocs(url, port, swaggerDocsJson))
-      apiRouter.get('/docs-json', (_, res) => {
-        res.json(swaggerDocsJson)
-      })
-    }
+    // Always enable Swagger for development and testing
+    const swaggerDocsJson = JSON.parse(
+      JSON.stringify(generateSwaggerDocs(context)),
+    )
+    apiRouter.use('/docs', ...swaggerDocs(url, port, swaggerDocsJson))
+    apiRouter.get('/docs-json', (_, res) => {
+      res.json(swaggerDocsJson)
+    })
 
     app.get('/health', (req, res) => {
       res.status(200).send('OK')

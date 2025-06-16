@@ -47,7 +47,7 @@ export function generateSwaggerDocs(context: Context) {
       description:
         '[http://localhost:3000/api/docs-json](http://localhost:3000/api/docs-json)',
     },
-    servers: [{ url: 'v1' }],
+    servers: [{ url: '/api' }],
   })
 
   return doc
