@@ -21,9 +21,12 @@ async function main() {
     emailClient,
   })
 
-  const registryContent = await fs.readFile('/app/packages/backend/src/data/registry.json', {
-    encoding: 'utf8',
-  })
+  const registryContent = await fs.readFile(
+    '/app/packages/backend/src/data/registry.json',
+    {
+      encoding: 'utf8',
+    },
+  )
 
   if (!config.skipInitialDataLoad) {
     const registry = JSON.parse(registryContent)

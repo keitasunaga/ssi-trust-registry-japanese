@@ -19,11 +19,14 @@ export async function createValidationService(
 
 async function validateDids(didResolver: DidResolver, dids: string[]) {
   // Skip DID validation in development environment
-  if (process.env.NODE_ENV === 'development' || process.env.SKIP_DID_VALIDATION === 'true') {
+  if (
+    process.env.NODE_ENV === 'development' ||
+    process.env.SKIP_DID_VALIDATION === 'true'
+  ) {
     console.log('Skipping DID validation in development environment')
     return
   }
-  
+
   for (const did of dids) {
     const didDocument = await didResolver.resolveDid(did)
     if (!didDocument) {

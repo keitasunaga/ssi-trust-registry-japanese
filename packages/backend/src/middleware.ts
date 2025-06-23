@@ -100,7 +100,10 @@ export function swaggerDocs(
       url: `${url}:${port}/api/docs-json`,
     },
   }
-  return [...(swaggerUi.serve as unknown as RequestHandler[]), swaggerUi.setup(openApiDocs, uiOptions) as unknown as RequestHandler]
+  return [
+    ...(swaggerUi.serve as unknown as RequestHandler[]),
+    swaggerUi.setup(openApiDocs, uiOptions) as unknown as RequestHandler,
+  ]
 }
 
 export function disableInProduction(
