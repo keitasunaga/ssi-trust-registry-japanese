@@ -12,7 +12,7 @@
     "validate": "yarn format:check && yarn lint"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.3.2",
+    "@hookform/resolvers": "^5.1.1",
     "@ssi-trust-registry/common": "1.0.0",
     "dayjs": "^1.11.10",
     "next": "^14.0.4",
