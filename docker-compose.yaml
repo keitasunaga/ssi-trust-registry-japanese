@@ -46,17 +46,7 @@ services:
         chmod 400 /auth/file.key
         chown 999:999 /auth/file.key
         exec docker-entrypoint.sh $$@
-    command:
-      [
-        'mongod',
-        '--port',
-        '27017',
-        '--keyFile',
-        '/auth/file.key',
-        '--replSet',
-        'rs0',
-        '--bind_ip_all',
-      ]
+    command: [ 'mongod', '--port', '27017', '--keyFile', '/auth/file.key', '--replSet', 'rs0', '--bind_ip_all' ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
@@ -68,6 +58,7 @@ services:
     networks:
       - ssi-trust-registry
     volumes:
+      - mongo-data:/data/db
       - ./.docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
       - ./.docker/mongodb/local.file.key:/auth/local.file.key
     healthcheck:
@@ -82,7 +73,7 @@ services:
       - ssi-trust-registry
     volumes:
       - ./.docker/mongodb/scripts:/scripts
-    entrypoint: ['bash', '/scripts/mongo-setup.sh']
+    entrypoint: [ 'bash', '/scripts/mongo-setup.sh' ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
@@ -130,6 +121,7 @@ services:
 volumes:
   mongo-data:
   smtp4dev-data:
+
 
 networks:
   ssi-trust-registry:
